@@ -1,4 +1,6 @@
 dependencies {
+    compile project(':ftc-visionlib')
+    compile project(':opencv-java')
     compile (name:'Inspection-release', ext: 'aar')
     compile (name:'Blocks-release', ext: 'aar')
     compile (name:'RobotCore-release', ext: 'aar')

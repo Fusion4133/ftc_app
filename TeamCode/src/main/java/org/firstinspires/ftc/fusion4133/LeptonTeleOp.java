@@ -40,7 +40,7 @@ public class LeptonTeleOp extends OpMode{
         double bpInc = 0.001;
         double tuskINC = 0.002;
 
-        // Run wheels in tank mode (note: The joystick goes negative when pushed forwards, so negate it)
+        // This made sure that are two motors are going the same speed
         leftPower  = -gamepad1.left_stick_y;
         rightPower = -gamepad1.right_stick_y;
         robot.leftMotorFront.setPower(leftPower);
@@ -48,6 +48,7 @@ public class LeptonTeleOp extends OpMode{
         robot.rightMotorFront.setPower(rightPower);
         robot.rightMotorBack.setPower(rightPower);
 
+        //Run motor with joy stick
         if(gamepad1.right_trigger > 0.3){
             robot.collectionMotor.setPower(1.0);
         }
@@ -58,7 +59,7 @@ public class LeptonTeleOp extends OpMode{
             robot.collectionMotor.setPower(0.0);
         }
 
-        //Run lift with analog stick
+        //Run lift with joy stick
         robot.liftMotor.setPower(gamepad2.left_stick_y);
 
         //button pusher section
@@ -79,14 +80,38 @@ public class LeptonTeleOp extends OpMode{
 
 
         if (gamepad2.a) {
-            robot.tuskServo.setPosition(Math.min(robot.tuskServo.getPosition() + tuskINC, robot.TUSK_DOWN));
+            robot.tuskServo.setPosition(Math.min(robot.tuskServo.getPosition() + tuskINC, robot.TUSK_UP));
         }
         else if (gamepad2.y) {
-            robot.tuskServo.setPosition(Math.max(robot.tuskServo.getPosition() - tuskINC, robot.TUSK_UP));
+            robot.tuskServo.setPosition(Math.max(robot.tuskServo.getPosition() - tuskINC, robot.TUSK_DOWN));
         }
+        telemetry.addData("tuskServo", robot.tuskServo.getPosition());
+
+        if (gamepad2.x) {
+            robot.tuskCatch.setPosition(Math.min(robot.tuskCatch.getPosition() + tuskINC, robot.TUSK_UP));
+        }
+        else if (gamepad2.b) {
+            robot.tuskCatch.setPosition(Math.max(robot.tuskCatch.getPosition() - tuskINC, robot.TUSK_DOWN));
+        }
+        telemetry.addData("tuskCatch", robot.tuskCatch.getPosition());
+
+        /*if (gamepad2.dpad_down) {
+            robot.tuskCatch.setPosition(robot.TUSK_CATCH_OPEN);
+        }
+        else if (gamepad2.dpad_up) {
+            robot.tuskCatch.setPosition(robot.TUSK_CATCH_CLOSED);
+        }
+        */
 
         // Send telemetry message to signify robot running;
+        telemetry.addData("rightBack", Integer.toString(robot.rightMotorBack.getCurrentPosition()));
+        telemetry.addData("leftFront", Integer.toString(robot.leftMotorFront.getCurrentPosition()));
+        telemetry.addData("leftBack", Integer.toString(robot.leftMotorBack.getCurrentPosition()));
+        telemetry.addData("rightFront", Integer.toString(robot.rightMotorFront.getCurrentPosition()));
+
         telemetry.addData("left",  "%.2f", leftPower);
         telemetry.addData("right", "%.2f", rightPower);
+        telemetry.addData("Servo position left","%.2f", robot.buttonPushLeft.getPosition());
+        telemetry.addData("Servo position right","%.2f", robot.buttonPushRight.getPosition());
     }
 }

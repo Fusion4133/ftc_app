@@ -19,6 +19,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class LeptonHardwareSetup {
 
     /* Public OpMode members. */
+    //these are the null statements to make sure nothing is stored in the variables.
+    //we do this so the program dose not get confused.
     public DcMotor leftMotorBack   = null;
     public DcMotor leftMotorFront  = null;
     public DcMotor rightMotorBack  = null;
@@ -30,6 +32,7 @@ public class LeptonHardwareSetup {
     public Servo   buttonPushLeft  = null;
     public Servo   buttonPushRight = null;
     public Servo   tuskServo       = null;
+    public Servo   tuskCatch       = null;
 
     public GyroSensor gyro         = null;
 
@@ -37,13 +40,15 @@ public class LeptonHardwareSetup {
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
 
-    final static double MOTOR_STOP  = 0.0;
-    final static double BPR_IN      = 0.92;
-    final static double BPR_OUT     = 0.1;
-    final static double BPL_IN      = 0.92;
-    final static double BPL_OUT     = 0.1;
-    final static double TUSK_UP     = 0.0;
-    final static double TUSK_DOWN   = 1.0;
+    final static double MOTOR_STOP        = 0.0;  //this is how we make sure in int we are completely stopped.
+    final static double BPR_IN            = 0.58; //this is where the right sides button pusher is fully in.
+    final static double BPR_OUT           = 0.1; //this is how we make sure that we are getting the full range of the servo.
+    final static double BPL_IN            = 0.54; //this is where the left sides button pusher is fully in.
+    final static double BPL_OUT           = 0.1; //this is how we make sure that we are getting the full range of the servo.
+    final static double TUSK_UP           = 0.0; //this is how we get the tusk all the way down.
+    final static double TUSK_DOWN         = 1.0; //this is how we make sure that we are getting the full range of the servo.
+    final static double TUSK_CATCH_CLOSED = 1.0;
+    final static double TUSK_CATCH_OPEN   = 0.0;
 
     /* Constructor */
     public LeptonHardwareSetup(){
@@ -59,6 +64,7 @@ public class LeptonHardwareSetup {
          * MOTOR SECTION
          ************************************************************/
         // Define Motors
+        //this is to put in the variable that we will put in the config file.
         leftMotorFront   = hwMap.dcMotor.get("lmf");
         leftMotorBack    = hwMap.dcMotor.get("lmb");
         rightMotorFront  = hwMap.dcMotor.get("rmf");
@@ -67,14 +73,14 @@ public class LeptonHardwareSetup {
         collectionMotor  = hwMap.dcMotor.get("cm");
 
         //Set the direction of motors
-        leftMotorFront.setDirection(DcMotor.Direction.REVERSE);
+        leftMotorFront.setDirection(DcMotor.Direction.REVERSE); //we have to set two motors on the same side in revers so that the robot goes forward on both sides and dose not spin
         leftMotorBack.setDirection(DcMotor.Direction.REVERSE);
         rightMotorFront.setDirection(DcMotor.Direction.FORWARD);
         rightMotorBack.setDirection(DcMotor.Direction.FORWARD);
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
-        collectionMotor.setDirection(DcMotor.Direction.REVERSE);
+        collectionMotor.setDirection(DcMotor.Direction.REVERSE);//this reversed so that the collection motor goes forward.
 
-        //Initialize all motors to be stopped
+        //We have to make sure the motors don't move in initialize.
         leftMotorFront.setPower(MOTOR_STOP);
         leftMotorBack.setPower(MOTOR_STOP);
         rightMotorFront.setPower(MOTOR_STOP);
@@ -85,10 +91,10 @@ public class LeptonHardwareSetup {
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftMotorFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftMotorBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotorFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotorBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftMotorBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotorBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         collectionMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -96,11 +102,13 @@ public class LeptonHardwareSetup {
          * SERVO SECTION
          ************************************************************/
         //Define servos
+        //this is to put in the variable that we will put in the config file.
         buttonPushLeft   = hwMap.servo.get("bpl");
         buttonPushRight  = hwMap.servo.get("bpr");
         tuskServo        = hwMap.servo.get("ts");
+        tuskCatch        = hwMap.servo.get("tc");
 
-        //Initialize servo positions
+        //Initialize servo positions so they are completely in
         buttonPushRight.setPosition(BPR_IN);
         buttonPushLeft.setPosition(BPL_IN);
         tuskServo.setPosition(TUSK_UP);
