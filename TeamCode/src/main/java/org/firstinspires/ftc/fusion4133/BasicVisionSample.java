@@ -31,7 +31,7 @@ public class BasicVisionSample extends VisionOpMode {
          * PRIMARY = Front-facing, larger camera
          * SECONDARY = Screen-facing, "selfie" camera :D
          **/
-        this.setCamera(Cameras.PRIMARY);
+        this.setCamera(Cameras.SECONDARY);
 
         /**
          * Set the frame size
@@ -85,7 +85,7 @@ public class BasicVisionSample extends VisionOpMode {
          * calling either setActivityOrientationAutoRotate() or setActivityOrientationFixed(). If
          * you don't, the camera reader may have problems reading the current orientation.
          */
-        rotation.setIsUsingSecondaryCamera(false);
+        rotation.setIsUsingSecondaryCamera(true);
         rotation.disableAutoRotate();
         rotation.setActivityOrientationFixed(ScreenOrientation.PORTRAIT);
 

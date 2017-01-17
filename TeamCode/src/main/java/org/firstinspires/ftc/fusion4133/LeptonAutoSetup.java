@@ -15,14 +15,16 @@ import org.lasarobotics.vision.opmode.LinearVisionOpMode;
  * Created by Fusion on 11/6/2016.
  */
 public abstract class LeptonAutoSetup extends LinearVisionOpMode {
-    AutonomousTextOption    allianceColor = new AutonomousTextOption("Alliance Color", "blue", new String[] {"Blue", "Red"});
-    AutonomousTextOption    startPos      = new AutonomousTextOption("Start Position", "Middle", new String [] {"Corner", "Center"});
+    AutonomousTextOption    allianceColor = new AutonomousTextOption("Alliance Color", "blue", new String[] {"blue", "red"});
+    AutonomousTextOption    startPos      = new AutonomousTextOption("Start Position", "middle", new String [] {"middle", "line"});
     AutonomousIntOption     waitStart     = new AutonomousIntOption("Wait at Start", 0, 0, 20);
-    AutonomousBooleanOption parkCenter = new AutonomousBooleanOption("Park Center", true);
-    AutonomousBooleanOption pressBeacons = new AutonomousBooleanOption("Press Beacons", true);
-    AutonomousBooleanOption parkCorner = new AutonomousBooleanOption("Park Corner", true);
+    AutonomousIntOption     numberBalls    = new AutonomousIntOption("Shoot Balls", 2, 0, 2);
+    AutonomousBooleanOption parkCenter    = new AutonomousBooleanOption("Park Center", true);
+    AutonomousBooleanOption pressBeacons  = new AutonomousBooleanOption("Press Beacons", true);
+    AutonomousBooleanOption parkCorner    = new AutonomousBooleanOption("Park Corner", true);
+    AutonomousIntOption     waitShoot     = new AutonomousIntOption("Wait after Shoot", 0, 0, 20 );
 
-    AutonomousOption [] autoOptions = {allianceColor, startPos, waitStart, parkCenter, pressBeacons, parkCorner};
+    AutonomousOption [] autoOptions       = {allianceColor, startPos, waitStart, numberBalls, waitShoot, pressBeacons, parkCenter, parkCorner};
     int currentOption = 0;
 
     boolean aPressed = false;
@@ -36,10 +38,14 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
     final  int   tickOverRun   = 80;   //number of tick robot overruns target after stop
     final double inchesPerDeg  = .142;  //wheel base of robot * pi / 360
     final double tickPerDeg    = ticksPerInch * inchesPerDeg;
-    ElapsedTime movementTime  = new ElapsedTime();
+    ElapsedTime movementTime   = new ElapsedTime();
     double leftDirAdj;
     double rightDirAdj;
+    //time to rotate, 600 @ 1.0 motor power
+    //time to rotate,
 
+    final int timeToRotate     = 700; //milliseconds to rotate around one time
+    final int timeToLoadBall   = 1000; //milliseconds it takes for the next ball to fall into the popper
     // This is where we define our drives.
     public enum driveDirections{
         FORWARD, BACKWARD
@@ -83,7 +89,6 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
 
                 if (gamepad1.a && !aPressed) {
                     currentOption = currentOption + 1;
-                    telemetry.clearAll();
                     aPressed = true;
                 } else {
                     aPressed = gamepad1.a;
@@ -91,7 +96,6 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
 
                 if (gamepad1.y && !yPressed) {
                     currentOption = currentOption - 1;
-                    telemetry.clearAll();
                     yPressed = true;
                 } else {
                     yPressed = gamepad1.y;
@@ -115,7 +119,6 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
             Thread.yield();
         }
 
-        telemetry.clearAll();
         telemetry.addData("Robot","READY!!");
         telemetry.update();
     }
@@ -283,62 +286,8 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
 
     }
     //
-    public void spinENC (double ispeed, int idist, turnDirections idir) {
+    public void spinENC (double ispeed, int idist, turnDirections idir, double iAllianceAdj) {
 
-        /*int leftTargetFront;
-        int leftTargetBack;
-        int rightTargetFront;
-        int rightTargetBack;
-
-        resetEncoders();
-
-        if(idir == turnDirections.LEFT){
-            leftDirAdj  = -1.0;
-            rightDirAdj = 1.0;
-        }
-        else {
-            leftDirAdj  = 1.0;
-            rightDirAdj = -1.0;
-        }
-
-        leftTargetFront  = robot.leftMotorFront.getCurrentPosition()  + (int) (idist*tickPerDeg*leftDirAdj);
-        leftTargetBack   = robot.leftMotorBack.getCurrentPosition()   + (int) (idist*tickPerDeg*leftDirAdj);
-        rightTargetFront = robot.rightMotorFront.getCurrentPosition() + (int) (idist*tickPerDeg*rightDirAdj);
-        rightTargetBack  = robot.rightMotorBack.getCurrentPosition()  + (int) (idist*tickPerDeg*rightDirAdj);
-
-        robot.leftMotorFront.setTargetPosition(leftTargetFront);
-        robot.leftMotorBack.setTargetPosition(leftTargetBack);
-        robot.rightMotorFront.setTargetPosition(rightTargetFront);
-        robot.rightMotorBack.setTargetPosition(rightTargetBack);
-
-        robot.leftMotorFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.leftMotorBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.rightMotorBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.rightMotorFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        robot.rightMotorBack.setPower(ispeed*rightDirAdj);
-        robot.rightMotorFront.setPower(ispeed*rightDirAdj);
-        robot.leftMotorBack.setPower(ispeed*leftDirAdj);
-        robot.leftMotorFront.setPower(ispeed*leftDirAdj);
-
-        while (opModeIsActive()&&
-                robot.leftMotorFront.isBusy()&&
-                robot.leftMotorBack.isBusy()&&
-                robot.rightMotorFront.isBusy()&&
-                robot.rightMotorBack.isBusy()) {
-        }
-
-        robot.rightMotorFront.setPower(0.0);
-        robot.rightMotorBack.setPower(0.0);
-        robot.leftMotorBack.setPower(0.0);
-        robot.leftMotorFront.setPower(0.0);
-
-        robot.leftMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.leftMotorBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightMotorBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    */
         double vSpeed = ispeed;
 
         int leftTargetFront;
@@ -362,11 +311,11 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         int rightAdjTargetBack;
 
         if (idir == turnDirections.RIGHT) {
-            leftDirAdj = 1.0;
-            rightDirAdj = -1.0;
+            leftDirAdj = 1.0 * iAllianceAdj;
+            rightDirAdj = -1.0 * iAllianceAdj;
         } else {
-            leftDirAdj = -1.0;
-            rightDirAdj = 1.0;
+            leftDirAdj = -1.0 * iAllianceAdj;
+            rightDirAdj = 1.0 * iAllianceAdj;
         }
 
         leftStartFront = robot.leftMotorFront.getCurrentPosition();
@@ -396,7 +345,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         robot.leftMotorFront.setPower(vSpeed * leftDirAdj);
         robot.leftMotorBack.setPower(vSpeed * leftDirAdj);
 
-        if (idir == turnDirections.RIGHT) {
+        if ((idir == turnDirections.RIGHT && iAllianceAdj > 0.0) || (idir == turnDirections.LEFT && iAllianceAdj < 0.0)) {
 
             while (opModeIsActive() &&
                     robot.leftMotorFront.getCurrentPosition() < leftAdjTargetFront &&
@@ -582,4 +531,188 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         robot.rightMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    public void shootBalls () throws InterruptedException{
+        double popperPower = 0.8;
+        if (numberBalls.getValue() > 0){
+            for (int i = 0; i < numberBalls.getValue(); i ++) {
+               //for a battery at 12.75 volts, 1.0 motor power
+                //for a battery at 13.31 volts, 0.9 motor power
+
+
+                robot.popperMotor.setPower (popperPower);
+                Thread.sleep(timeToRotate);
+                robot.popperMotor.setPower(0.0);
+                Thread.sleep(timeToLoadBall);
+                //popperPower = 0.6;
+            }
+        }
+        else {
+            Thread.sleep(2000);
+        }
+    }
+    public void driveENCRange (double ispeed, int idist, driveDirections idir, double irange) {
+
+        double vSpeed = ispeed;
+
+        int leftTargetFront;
+        int leftTargetBack;
+        int rightTargetFront;
+        int rightTargetBack;
+
+        int leftStartFront = 0;
+        int leftStartBack = 0;
+        int rightStartFront = 0;
+        int rightStartBack = 0;
+
+        int leftFinalFront = 0;
+        int leftFinalBack = 0;
+        int rightFinalFront = 0;
+        int rightFinalBack = 0;
+
+        int leftAdjTargetFront;
+        int leftAdjTargetBack;
+        int rightAdjTargetFront;
+        int rightAdjTargetBack;
+
+        if (idir == driveDirections.FORWARD) {
+            leftDirAdj = 1.0;
+            rightDirAdj = 1.0;
+        } else {
+            leftDirAdj = -1.0;
+            rightDirAdj = -1.0;
+            vSpeed = vSpeed * -1;
+        }
+
+        leftStartFront = robot.leftMotorFront.getCurrentPosition();
+        leftStartBack = robot.leftMotorBack.getCurrentPosition();
+        rightStartFront = robot.rightMotorFront.getCurrentPosition();
+        rightStartBack = robot.rightMotorBack.getCurrentPosition();
+
+        leftTargetFront = leftStartFront + (int) (idist * ticksPerInch * leftDirAdj);
+        leftTargetBack = leftStartBack + (int) (idist * ticksPerInch * leftDirAdj);
+        rightTargetFront = rightStartFront + (int) (idist * ticksPerInch * rightDirAdj);
+        rightTargetBack = rightStartBack + (int) (idist * ticksPerInch * rightDirAdj);
+
+        leftAdjTargetFront = leftTargetFront - (int) (tickOverRun * leftDirAdj);
+        leftAdjTargetBack = leftTargetBack - (int) (tickOverRun * leftDirAdj);
+        rightAdjTargetFront = rightTargetFront - (int) (tickOverRun * rightDirAdj);
+        rightAdjTargetBack = rightTargetBack - (int) (tickOverRun * rightDirAdj);
+
+        telemetry.addData("leftFront", Integer.toString(leftStartFront) + "; " + Integer.toString(leftTargetFront) + "; " + Integer.toString(leftFinalFront));
+        telemetry.addData("leftBack", Integer.toString(leftStartBack) + "; " + Integer.toString(leftTargetBack) + "; " + Integer.toString(leftFinalBack));
+        telemetry.addData("rightFront", Integer.toString(rightStartFront) + "; " + Integer.toString(rightTargetFront) + "; " + Integer.toString(rightFinalFront));
+        telemetry.addData("rightBack", Integer.toString(rightStartBack) + "; " + Integer.toString(rightTargetBack) + "; " + Integer.toString(rightFinalBack));
+
+        telemetry.update();
+
+        robot.rightMotorBack.setPower(vSpeed);
+        robot.rightMotorFront.setPower(vSpeed);
+        robot.leftMotorFront.setPower(vSpeed);
+        robot.leftMotorBack.setPower(vSpeed);
+
+        if (idir == driveDirections.FORWARD) {
+
+            while (opModeIsActive() &&
+                    robot.leftMotorFront.getCurrentPosition() < leftAdjTargetFront &&
+                    robot.leftMotorBack.getCurrentPosition() < leftAdjTargetBack &&
+                    robot.rightMotorFront.getCurrentPosition() < rightAdjTargetFront &&
+                    robot.rightMotorBack.getCurrentPosition() < rightAdjTargetBack) {
+                rangeADJ(ispeed, idir, irange);
+                telemetry.update();
+            }
+        } else {
+            while (opModeIsActive() &&
+                    robot.leftMotorFront.getCurrentPosition() > leftAdjTargetFront &&
+                    robot.leftMotorBack.getCurrentPosition() > leftAdjTargetBack &&
+                    robot.rightMotorFront.getCurrentPosition() > rightAdjTargetFront &&
+                    robot.rightMotorBack.getCurrentPosition() > rightAdjTargetBack) {
+                rangeADJ(ispeed, idir, irange);
+                telemetry.update();
+            }
+        }
+
+        robot.rightMotorBack.setPower(0.0);
+        robot.rightMotorFront.setPower(0.0);
+        robot.leftMotorBack.setPower(0.0);
+        robot.leftMotorFront.setPower(0.0);
+
+        leftFinalFront = robot.leftMotorFront.getCurrentPosition();
+        leftFinalBack = robot.leftMotorBack.getCurrentPosition();
+        rightFinalFront = robot.rightMotorFront.getCurrentPosition();
+        rightFinalBack = robot.rightMotorBack.getCurrentPosition();
+
+        telemetry.addData("leftFront", Integer.toString(leftStartFront) + "; " + Integer.toString(leftTargetFront) + "; " + Integer.toString(leftFinalFront) + "; " + Integer.toString(leftAdjTargetFront));
+        telemetry.addData("leftBack", Integer.toString(leftStartBack) + "; " + Integer.toString(leftTargetBack) + "; " + Integer.toString(leftFinalBack) + "; " + Integer.toString(leftAdjTargetBack));
+        telemetry.addData("rightFront", Integer.toString(rightStartFront) + "; " + Integer.toString(rightTargetFront) + "; " + Integer.toString(rightFinalFront) + "; " + Integer.toString(rightAdjTargetFront));
+        telemetry.addData("rightBack", Integer.toString(rightStartBack) + "; " + Integer.toString(rightTargetBack) + "; " + Integer.toString(rightFinalBack) + "; " + Integer.toString(rightAdjTargetBack));
+
+        telemetry.update();
+    }
+
+    public void rangeADJ (double ispeed, driveDirections idir, double irange) {
+        double dirAdj;
+        double slowInc = 0.075;
+        double currentRange = robot.range.cmUltrasonic();
+
+        telemetry.addData("cm ultrasonic", "%.2f cm", currentRange);
+
+        if (idir == driveDirections.FORWARD) {
+            dirAdj = 1.0;
+        } else {
+            dirAdj = -1.0;
+        }
+
+        if (irange > currentRange){
+            telemetry.addData("i am", " too close");
+            if (allianceColor.getValue().equals("red")){
+                if (Math.abs(robot.leftMotorBack.getPower()) < ispeed){
+                    robot.leftMotorBack.setPower(ispeed * dirAdj);
+                    robot.leftMotorFront.setPower(ispeed * dirAdj);
+                }
+                else{
+                    robot.rightMotorBack.setPower((ispeed - slowInc) * dirAdj);
+                    robot.rightMotorFront.setPower((ispeed - slowInc) * dirAdj);
+                }
+            }
+            else {
+                if (Math.abs(robot.leftMotorBack.getPower()) < ispeed){
+                    robot.leftMotorFront.setPower(ispeed * dirAdj);
+                    robot.leftMotorBack.setPower(ispeed * dirAdj);
+                }
+                else{
+                    robot.rightMotorBack.setPower((ispeed - slowInc) * dirAdj);
+                    robot.rightMotorFront.setPower((ispeed - slowInc) * dirAdj);
+                }
+            }
+        }
+        else if (irange < currentRange){
+            telemetry.addData("i am", " too far");
+            if (allianceColor.getValue().equals("blue")){
+                if (Math.abs(robot.leftMotorBack.getPower()) < ispeed){
+                    robot.leftMotorBack.setPower(ispeed * dirAdj);
+                    robot.leftMotorFront.setPower(ispeed * dirAdj);
+                }
+                else{
+                    robot.rightMotorBack.setPower((ispeed - slowInc) * dirAdj);
+                    robot.rightMotorFront.setPower((ispeed - slowInc) * dirAdj);
+                }
+            }
+            else {
+                if (Math.abs(robot.rightMotorBack.getPower()) < ispeed){
+                    robot.rightMotorFront.setPower(ispeed * dirAdj);
+                    robot.rightMotorBack.setPower(ispeed * dirAdj);
+                }
+                else{
+                    robot.leftMotorBack.setPower((ispeed - slowInc) * dirAdj);
+                    robot.leftMotorFront.setPower((ispeed - slowInc) * dirAdj);
+                }
+            }
+        }
+         else {
+            robot.leftMotorBack.setPower(ispeed * dirAdj);
+            robot.leftMotorFront.setPower(ispeed * dirAdj);
+            robot.rightMotorBack.setPower(ispeed * dirAdj);
+            robot.rightMotorFront.setPower(ispeed * dirAdj);
+        }
+    }
 }

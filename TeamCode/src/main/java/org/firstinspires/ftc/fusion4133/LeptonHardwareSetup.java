@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.fusion4133;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsUsbServoController;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.CompassSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -12,6 +16,8 @@ import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.ServoEx;
 import com.qualcomm.robotcore.hardware.configuration.ServoControllerConfiguration;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorMRRangeSensor;
 
 /**
  * Created by Fusion on 10/26/2016.
@@ -27,14 +33,19 @@ public class LeptonHardwareSetup {
     public DcMotor rightMotorFront = null;
     public DcMotor liftMotor       = null;
     public DcMotor collectionMotor = null;
+    public DcMotor popperMotor     = null;
 
 //    public Servo   buttonPushLeft  = null;
     public Servo   buttonPushLeft  = null;
     public Servo   buttonPushRight = null;
     public Servo   tuskServo       = null;
-    public Servo   tuskCatch       = null;
+    public Servo   hornServo       = null;
 
-    public GyroSensor gyro         = null;
+// our sensor hardware setup
+    public GyroSensor                     gyro     = null;
+    public ColorSensor                    color    = null;
+    public ModernRoboticsI2cRangeSensor   range    = null;
+
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
@@ -42,13 +53,17 @@ public class LeptonHardwareSetup {
 
     final static double MOTOR_STOP        = 0.0;  //this is how we make sure in int we are completely stopped.
     final static double BPR_IN            = 0.58; //this is where the right sides button pusher is fully in.
-    final static double BPR_OUT           = 0.1; //this is how we make sure that we are getting the full range of the servo.
-    final static double BPL_IN            = 0.54; //this is where the left sides button pusher is fully in.
-    final static double BPL_OUT           = 0.1; //this is how we make sure that we are getting the full range of the servo.
-    final static double TUSK_UP           = 0.0; //this is how we get the tusk all the way down.
+    final static double BPR_OUT           = 0.11; //this is how we make sure that we are getting the full range of the servo.
+    final static double BPR_MID           = 0.3;
+    final static double BPL_IN            = 0.55; //this is where the left sides button pusher is fully in.
+    final static double BPL_OUT           = 0.11; //this is how we make sure that we are getting the full range of the servo.
+    final static double BPL_MID           = 0.3;
+    final static double TUSK_UP           = 0.0; //this is how we get the tusk all the way up.
     final static double TUSK_DOWN         = 1.0; //this is how we make sure that we are getting the full range of the servo.
-    final static double TUSK_CATCH_CLOSED = 1.0;
-    final static double TUSK_CATCH_OPEN   = 0.0;
+    final static double TUSK_GRAB         = 0.7; //this is the position the tusks need to be in to grab the cap ball
+    final static double TUSK_READY        = 0.5; //this is the position we go to right before we grab the ball
+    final static double HORN_UP           = 1.0;
+    final static double HORN_RELEASED     = 0.0;
 
     /* Constructor */
     public LeptonHardwareSetup(){
@@ -71,6 +86,7 @@ public class LeptonHardwareSetup {
         rightMotorBack   = hwMap.dcMotor.get("rmb");
         liftMotor        = hwMap.dcMotor.get("lm");
         collectionMotor  = hwMap.dcMotor.get("cm");
+        popperMotor      = hwMap.dcMotor.get("pm");
 
         //Set the direction of motors
         leftMotorFront.setDirection(DcMotor.Direction.REVERSE); //we have to set two motors on the same side in revers so that the robot goes forward on both sides and dose not spin
@@ -79,6 +95,7 @@ public class LeptonHardwareSetup {
         rightMotorBack.setDirection(DcMotor.Direction.FORWARD);
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
         collectionMotor.setDirection(DcMotor.Direction.REVERSE);//this reversed so that the collection motor goes forward.
+        popperMotor.setDirection(DcMotor.Direction.FORWARD);//this reversed so that the collection motor goes forward.
 
         //We have to make sure the motors don't move in initialize.
         leftMotorFront.setPower(MOTOR_STOP);
@@ -87,6 +104,7 @@ public class LeptonHardwareSetup {
         rightMotorBack.setPower(MOTOR_STOP);
         liftMotor.setPower(MOTOR_STOP);
         collectionMotor.setPower(MOTOR_STOP);
+        popperMotor.setPower(MOTOR_STOP);
 
 
         // Set all motors to run without encoders.
@@ -97,6 +115,7 @@ public class LeptonHardwareSetup {
         rightMotorBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         collectionMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        popperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         /************************************************************
          * SERVO SECTION
@@ -106,18 +125,21 @@ public class LeptonHardwareSetup {
         buttonPushLeft   = hwMap.servo.get("bpl");
         buttonPushRight  = hwMap.servo.get("bpr");
         tuskServo        = hwMap.servo.get("ts");
-        tuskCatch        = hwMap.servo.get("tc");
+        hornServo        = hwMap.servo.get("hs");
 
         //Initialize servo positions so they are completely in
         buttonPushRight.setPosition(BPR_IN);
         buttonPushLeft.setPosition(BPL_IN);
-        tuskServo.setPosition(TUSK_UP);
-
+        tuskServo.setPosition(TUSK_DOWN);
+        hornServo.setPosition(HORN_UP);
 
         /************************************************************
          * SENSOR SECTION
          ************************************************************/
         //Define sensors
+        gyro   = hwMap.gyroSensor.get("gyro");
+        color  = hwMap.colorSensor.get("color");
+        //range  = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");
     }
 
     /***
