@@ -3,6 +3,7 @@ package org.firstinspires.ftc.fusion4133;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
@@ -24,12 +25,16 @@ public class LeptonTeleOp extends OpMode{
 
     @Override
     public void init() {
-        telemetry.addData("Step", "Initializing");
-        telemetry.update();
+        //telemetry.addData("Step", "Initializing");
+        //telemetry.update();
 
         robot.init(hardwareMap);
+        robot.leftMotorBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.leftMotorFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightMotorBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightMotorFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        telemetry.addData("Step", "Init Complete");
+       // telemetry.addData("Step", "Init Complete");
     }
 
     @Override
@@ -39,7 +44,7 @@ public class LeptonTeleOp extends OpMode{
 
     @Override
     public void loop() {
-        telemetry.addData("Step", "Running");
+       // telemetry.addData("Step", "Running");
 
         //JOYSTICK 1
         // This made sure that are two motors are going the same speed
@@ -94,7 +99,7 @@ public class LeptonTeleOp extends OpMode{
         else if (gamepad2.dpad_right) {
             robot.tuskServo.setPosition(robot.TUSK_READY);
         }
-        telemetry.addData("tuskServo", robot.tuskServo.getPosition());
+        //telemetry.addData("tuskServo", robot.tuskServo.getPosition());
 
         //horn
         if (gamepad2.left_bumper) {
@@ -121,10 +126,11 @@ public class LeptonTeleOp extends OpMode{
         telemetry.addData("leftBack", Integer.toString(robot.leftMotorBack.getCurrentPosition()));
         telemetry.addData("rightFront", Integer.toString(robot.rightMotorFront.getCurrentPosition()));
         */
-        telemetry.addData("left",  "%.2f", leftPower);
+       /* telemetry.addData("left",  "%.2f", leftPower);
         telemetry.addData("right", "%.2f", rightPower);
         telemetry.addData("Servo position left","%.2f", robot.buttonPushLeft.getPosition());
         telemetry.addData("Servo position right","%.2f", robot.buttonPushRight.getPosition());
         telemetry.addData("trigger pos", "%.2f", gamepad2.right_trigger);
+        */
     }
 }

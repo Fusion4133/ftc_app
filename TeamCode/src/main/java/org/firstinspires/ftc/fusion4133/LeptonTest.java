@@ -19,6 +19,8 @@ public class LeptonTest extends OpMode{
     double bpInc = 0.001;
     double tuskINC = 0.002;
 
+    boolean ledOn = true;
+
     @Override
     public void init() {
         telemetry.addData("Step", "Initializing");
@@ -104,6 +106,11 @@ public class LeptonTest extends OpMode{
             robot.popperMotor.setPower(1.0);
         }
 
+        if (gamepad1.a){
+            ledOn = !ledOn;
+            robot.color.enableLed(ledOn);
+        }
+
         // Send telemetry message to signify robot running;
       /*  telemetry.addData("rightBack", Integer.toString(robot.rightMotorBack.getCurrentPosition()));
         telemetry.addData("leftFront", Integer.toString(robot.leftMotorFront.getCurrentPosition()));
@@ -113,12 +120,14 @@ public class LeptonTest extends OpMode{
 
         telemetry.addData("left",  "%.2f", leftPower);
         telemetry.addData("right", "%.2f", rightPower);
-        telemetry.addData("Servo position left","%.2f", robot.buttonPushLeft.getPosition());
-        telemetry.addData("Servo position right","%.2f", robot.buttonPushRight.getPosition());
+        telemetry.addData("Button position left","%.2f", robot.buttonPushLeft.getPosition());
+        telemetry.addData("Button position right","%.2f", robot.buttonPushRight.getPosition());
 
-        telemetry.addData("cm optical", "%.2f cm", robot.range.cmOptical());
+        telemetry.addData("red light", robot.color.red());
+
+//        telemetry.addData("cm optical", "%.2f cm", robot.range.cmOptical());
         telemetry.addData("cm ultrasonic", "%.2f cm", robot.range.cmUltrasonic());
-        telemetry.addData("cm", "%.2f cm", robot.range.getDistance(DistanceUnit.CM));
+//        telemetry.addData("cm", "%.2f cm", robot.range.getDistance(DistanceUnit.CM));
 
     }
 }

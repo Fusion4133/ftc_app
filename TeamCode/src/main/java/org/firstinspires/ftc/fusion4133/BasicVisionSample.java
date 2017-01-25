@@ -1,4 +1,4 @@
-package com.qualcomm.ftcrobotcontroller.opmodes;
+package org.firstinspires.ftc.fusion4133;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -19,7 +19,7 @@ import org.opencv.core.Size;
  * The VisionOpMode is the base of all vision processing and other styles of OpMode
  * even extend the VisionOpMode class! Be sure to extend it if writing your own OpMode structure.
  */
-@TeleOp(name="Vision: TeleOp", group="Vision")
+@TeleOp(name="Vision: TestTeleOp", group="Vision")
 public class BasicVisionSample extends VisionOpMode {
 
     @Override

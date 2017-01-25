@@ -54,10 +54,10 @@ public class LeptonHardwareSetup {
     final static double MOTOR_STOP        = 0.0;  //this is how we make sure in int we are completely stopped.
     final static double BPR_IN            = 0.58; //this is where the right sides button pusher is fully in.
     final static double BPR_OUT           = 0.11; //this is how we make sure that we are getting the full range of the servo.
-    final static double BPR_MID           = 0.3;
+    final static double BPR_MID           = 0.33;
     final static double BPL_IN            = 0.55; //this is where the left sides button pusher is fully in.
     final static double BPL_OUT           = 0.11; //this is how we make sure that we are getting the full range of the servo.
-    final static double BPL_MID           = 0.3;
+    final static double BPL_MID           = 0.33;
     final static double TUSK_UP           = 0.0; //this is how we get the tusk all the way up.
     final static double TUSK_DOWN         = 1.0; //this is how we make sure that we are getting the full range of the servo.
     final static double TUSK_GRAB         = 0.7; //this is the position the tusks need to be in to grab the cap ball

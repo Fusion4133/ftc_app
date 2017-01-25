@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.fusion4133;
 
-import android.hardware.Sensor;
+        import android.hardware.Sensor;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.robot.Robot;
-import com.qualcomm.robotcore.util.ElapsedTime;
+        import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+        import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+        import com.qualcomm.robotcore.hardware.DcMotor;
+        import com.qualcomm.robotcore.hardware.DcMotorController;
+        import com.qualcomm.robotcore.robot.Robot;
+        import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.lasarobotics.vision.opmode.LinearVisionOpMode;
+        import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 
 /**
  * Created by Fusion on 11/6/2016.
@@ -43,6 +43,29 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
     double rightDirAdj;
     //time to rotate, 600 @ 1.0 motor power
     //time to rotate,
+    double[]  bplPositions = {robot.BPL_IN,
+            robot.BPL_IN,
+            robot.BPL_IN,
+            robot.BPL_IN,
+            robot.BPL_IN,
+            robot.BPL_IN,
+            robot.BPL_IN,
+            robot.BPL_IN,
+            robot.BPL_IN,
+            0.51,
+            0.44,
+            0.41,
+            0.39,
+            0.38,
+            0.34,
+            0.30,
+            0.28,
+            0.25,
+            0.25,
+            0.22,
+            0.19,
+            0.17,
+            0.16};
 
     final int timeToRotate     = 700; //milliseconds to rotate around one time
     final int timeToLoadBall   = 1000; //milliseconds it takes for the next ball to fall into the popper
@@ -87,33 +110,25 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         while (currentOption< autoOptions.length && !opModeIsActive()){
             showOptions();
 
-                if (gamepad1.a && !aPressed) {
-                    currentOption = currentOption + 1;
-                    aPressed = true;
-                } else {
-                    aPressed = gamepad1.a;
-                }
+            if (gamepad1.a && !aPressed) {
+                currentOption = currentOption + 1;
+            }
+            aPressed = gamepad1.a;
 
-                if (gamepad1.y && !yPressed) {
-                    currentOption = currentOption - 1;
-                    yPressed = true;
-                } else {
-                    yPressed = gamepad1.y;
-                }
+            if (gamepad1.y && !yPressed) {
+                currentOption = currentOption - 1;
+            }
+            yPressed = gamepad1.y;
 
-                if (gamepad1.b && !bPressed) {
-                    autoOptions[currentOption].nextValue();
-                    bPressed = true;
-                } else {
-                    bPressed = gamepad1.b;
-                }
+            if (gamepad1.b && !bPressed) {
+                autoOptions[currentOption].nextValue();
+            }
+            bPressed = gamepad1.b;
 
-                if (gamepad1.x && !xPressed) {
-                    autoOptions[currentOption].previousValue();
-                    xPressed = true;
-                } else {
-                    xPressed = gamepad1.x;
-                }
+            if (gamepad1.x && !xPressed) {
+                autoOptions[currentOption].previousValue();
+            }
+            xPressed = gamepad1.x;
 
             telemetry.update();
             Thread.yield();
@@ -122,6 +137,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         telemetry.addData("Robot","READY!!");
         telemetry.update();
     }
+
     // This is our main drive that the distance is determaind by the encoders.
     public void driveENC (double ispeed, int idist, driveDirections idir) {
 
@@ -261,7 +277,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
     // This is a secondary spin turn where the amount of time is how far it turns.
     public void spinTime (double ispeed, int itime, turnDirections idir) {
 
-       if(idir == turnDirections.RIGHT){
+        if(idir == turnDirections.RIGHT){
             rightDirAdj = -1.0;
             leftDirAdj  = 1.0;
         }
@@ -535,7 +551,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         double popperPower = 0.8;
         if (numberBalls.getValue() > 0){
             for (int i = 0; i < numberBalls.getValue(); i ++) {
-               //for a battery at 12.75 volts, 1.0 motor power
+                //for a battery at 12.75 volts, 1.0 motor power
                 //for a battery at 13.31 volts, 0.9 motor power
 
 
@@ -675,13 +691,13 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
                 }
             }
             else {
-                if (Math.abs(robot.leftMotorBack.getPower()) < ispeed){
-                    robot.leftMotorFront.setPower(ispeed * dirAdj);
-                    robot.leftMotorBack.setPower(ispeed * dirAdj);
+                if (Math.abs(robot.rightMotorBack.getPower()) < ispeed){
+                    robot.rightMotorFront.setPower(ispeed * dirAdj);
+                    robot.rightMotorBack.setPower(ispeed * dirAdj);
                 }
                 else{
-                    robot.rightMotorBack.setPower((ispeed - slowInc) * dirAdj);
-                    robot.rightMotorFront.setPower((ispeed - slowInc) * dirAdj);
+                    robot.leftMotorBack.setPower((ispeed - (slowInc * 2.5)) * dirAdj);
+                    robot.leftMotorFront.setPower((ispeed - (slowInc * 2.5)) * dirAdj);
                 }
             }
         }
@@ -708,11 +724,26 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
                 }
             }
         }
-         else {
+        else {
             robot.leftMotorBack.setPower(ispeed * dirAdj);
             robot.leftMotorFront.setPower(ispeed * dirAdj);
             robot.rightMotorBack.setPower(ispeed * dirAdj);
             robot.rightMotorFront.setPower(ispeed * dirAdj);
+        }
+        try {
+            if (allianceColor.getValue().equals("blue")) {
+                robot.buttonPushRight.setPosition(bplPositions[(int) currentRange]);
+            } else {
+                robot.buttonPushLeft.setPosition(bplPositions[(int) currentRange]);
+            }
+        }
+        catch(Exception e){
+            if (allianceColor.getValue().equals("blue")) {
+                robot.buttonPushRight.setPosition(bplPositions[bplPositions.length-1]);
+            } else {
+                robot.buttonPushLeft.setPosition(bplPositions[bplPositions.length-1]);
+            }
+
         }
     }
 }

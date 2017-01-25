@@ -26,15 +26,16 @@ public class LeptonAuto extends LeptonAutoSetup {
     int frameCount = 0;
 
     double allianceColorAdj = 1.0;
-    double distFromWall = 15;
+    double distFromWall     = 13;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
+        telemetry.log().setCapacity(1);
 
         robot.init(hardwareMap);
 
-        telemetry.addData("step", "robot initalized");
+        telemetry.log().add("Robot Initalized");
         telemetry.update();
 
         robot.color.enableLed(false);
@@ -42,7 +43,7 @@ public class LeptonAuto extends LeptonAutoSetup {
 
         waitForVisionStart();
 
-        telemetry.addData("step", "vision start");
+        telemetry.log().add("Vision Started");
         telemetry.update();
 
         this.setCamera(Cameras.SECONDARY);
@@ -62,74 +63,147 @@ public class LeptonAuto extends LeptonAutoSetup {
         cameraControl.setColorTemperature(CameraControlExtension.ColorTemperature.AUTO);
         cameraControl.setAutoExposureCompensation();
 
+        telemetry.log().add("Select Options");
+        telemetry.update();
+
         selectOptions();
+
+        robot.range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "rangeLeft");
 
         if (allianceColor.getValue().equals("red")){
             allianceColorAdj = 1.0;
-            robot.range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "rangeLeft");
         }
         else {
             allianceColorAdj = -1.0;
-            robot.range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "rangeRight");
+//            robot.range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "rangeRight");
         }
+
+        telemetry.log().add("Waiting For Start");
+        telemetry.update();
 
         waitForStart();
 
-        telemetry.addData("step", "program start");
+        telemetry.log().add("Program Started");
+        telemetry.update();
 
         Thread.sleep((long) (waitStart.getValue() * 1000));
 
         if (startPos.getValue().equals("line")) {
-            driveENC(0.7, 12, driveDirections.FORWARD);
-            spinENC(0.2, 42, turnDirections.LEFT, allianceColorAdj);
-            driveENC(0.4, 2, driveDirections.FORWARD);
-            Thread.sleep(250);
+            driveFromLine();
         }
 
-        telemetry.addData("step", "shoot balls");
+        telemetry.log().add("Shoot Balls");
         telemetry.update();
+
+        robot.color.enableLed(false);
 
         shootBalls();
 
+        robot.color.enableLed(true);
+
         Thread.sleep((long) (waitShoot.getValue() * 1000));
 
-        if (pressBeacons.getValue() && startPos.getValue().equals("middle")){
+        if (pressBeacons.getValue()) {
+            doBeacons();
+        }
+        else if (parkCenter.getValue()){
+            //Need a small turn when on blue side to accommodate differences in shooting
+            if (allianceColor.getValue().equals("blue")) {
+                spinENC(0.7, 5, turnDirections.LEFT, allianceColorAdj);
+            }
+
+            if (allianceColor.getValue().equals("red")) {
+
+                driveENC(0.9, 56, driveDirections.FORWARD);
+            }
+            else {
+                driveENC(0.9, 54, driveDirections.FORWARD);
+            }
+        }
+    }
+
+    public void driveFromLine() throws InterruptedException {
+        if (allianceColor.getValue().equals("red")) {
+            driveENC(0.7, 12, driveDirections.FORWARD);
+            spinENC(0.7, 45, turnDirections.LEFT, allianceColorAdj);
+            driveENC(0.4, 2, driveDirections.FORWARD);
+            Thread.sleep(250);
+        } else {
+            driveENC(0.7, 12, driveDirections.FORWARD);
+            spinENC(0.7, 40, turnDirections.LEFT, allianceColorAdj);
+            driveENC(0.4, 4, driveDirections.FORWARD);
+            Thread.sleep(250);
+        }
+    }
+
+    public void doBeacons() throws InterruptedException {
+        if (startPos.getValue().equals("middle") && allianceColor.getValue().equals("red")){
+            telemetry.log().add("Move To Beacons From Mid");
+            telemetry.update();
+
             driveENC(.7, 8, driveDirections.FORWARD);
             spinENC(.4, 40, turnDirections.LEFT, allianceColorAdj);
             driveENC(.9, 60, driveDirections.FORWARD);
-            if (allianceColor.getValue().equals("red")){
+
                 robot.buttonPushLeft.setPosition(robot.BPL_MID);
-            }
-            else {
-                robot.buttonPushRight.setPosition(robot.BPR_MID);
-            }
+
             spinENC(.4, 34, turnDirections.RIGHT, allianceColorAdj);
         }
-        if (pressBeacons.getValue() && startPos.getValue().equals("line")){
+        else if (startPos.getValue().equals("middle") && allianceColor.getValue().equals("blue")){
+            telemetry.log().add("Move To Beacons From Mid");
+            telemetry.update();
+
+            driveENC(.7, 8, driveDirections.FORWARD);
+            spinENC(.4, 40, turnDirections.LEFT, allianceColorAdj);
+            driveENC(.9, 64, driveDirections.FORWARD);
+
+            robot.buttonPushRight.setPosition(robot.BPR_MID);
+
+
+            spinENC(.4, 47, turnDirections.RIGHT, allianceColorAdj);
+        }
+        else if (startPos.getValue().equals("line")){
+            telemetry.log().add("Move to Beacons From Line");
+            telemetry.update();
+
             spinENC(.4, 17, turnDirections.LEFT, allianceColorAdj);
             driveENC(.7, 90, driveDirections.FORWARD);
+
             if (allianceColor.getValue().equals("red")){
                 robot.buttonPushLeft.setPosition(robot.BPL_MID);
             }
             else {
                 robot.buttonPushRight.setPosition(robot.BPR_MID);
             }
-            spinENC(.4, 62, turnDirections.RIGHT, allianceColorAdj);
+
+            if (allianceColor.getValue().equals("red")) {
+
+                spinENC(.4, 62, turnDirections.RIGHT, allianceColorAdj);
+            }
+
+            else if (allianceColor.getValue().equals("blue")){
+
+                spinENC(.4, 62, turnDirections.RIGHT, allianceColorAdj);
+
+            }
+
         }
 
-        telemetry.addData("step", "beacon1 backward");
+        telemetry.log().add("Press First Beacon");
         telemetry.update();
 
         beacon(.45, driveDirections.BACKWARD, distFromWall);
-        if (allianceColor.getValue().equals("red")){
-            robot.buttonPushLeft.setPosition(robot.BPL_MID);
+
+        if (allianceColor.getValue().equals("blue")){
+            spinENC(0.5, 3, turnDirections.LEFT, 1.0);
         }
-        else {
-            robot.buttonPushRight.setPosition(robot.BPR_MID);
-        }
+
+        telemetry.log().add("Drive to Next Beacon");
+        telemetry.update();
+
         driveENCRange(.9, 45, driveDirections.FORWARD, distFromWall);
 
-        telemetry.addData("step", "beacon2 forward");
+        telemetry.log().add("Press Second Beacon");
         telemetry.update();
 
         beacon(.45, driveDirections.BACKWARD, distFromWall);
@@ -140,22 +214,18 @@ public class LeptonAuto extends LeptonAutoSetup {
         else {
             robot.buttonPushRight.setPosition(robot.BPR_IN);
         }
-        driveENC(0.9, 80, driveDirections.BACKWARD);
 
+        if (parkCorner.getValue()) {
+            if (allianceColor.getValue().equals("red")) {
+                spinENC(0.9, 10, turnDirections.LEFT, allianceColorAdj);
+            }
+            else {
+                spinENC(0.9, 5, turnDirections.LEFT, allianceColorAdj);
+            }
+
+            driveENC(0.9, 80, driveDirections.BACKWARD);
+        }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public void liftTusks() throws InterruptedException {
         robot.tuskServo.setPosition(robot.TUSK_UP);
@@ -166,36 +236,40 @@ public class LeptonAuto extends LeptonAutoSetup {
 
     public void beacon(double ispeed, driveDirections idir, double irange) throws InterruptedException {
         String dummyBeaconVal;
-     //drive to white line
-        telemetry.log().add("step: beacon");
+
+        //drive to white line
+        telemetry.log().add("Drive to White Line");
         telemetry.addData("white_line", robot.color.red());
         telemetry.update();
-       if (idir == driveDirections.FORWARD) {
-           robot.rightMotorBack.setPower(ispeed);
-           robot.rightMotorFront.setPower(ispeed);
-           robot.leftMotorFront.setPower(ispeed);
-           robot.leftMotorBack.setPower(ispeed);
-       }
+
+        if (idir == driveDirections.FORWARD) {
+            robot.rightMotorBack.setPower(ispeed);
+            robot.rightMotorFront.setPower(ispeed);
+            robot.leftMotorFront.setPower(ispeed);
+            robot.leftMotorBack.setPower(ispeed);
+        }
         else {
-           robot.rightMotorBack.setPower(-ispeed);
-           robot.rightMotorFront.setPower(-ispeed);
-           robot.leftMotorFront.setPower(-ispeed);
-           robot.leftMotorBack.setPower(-ispeed);
-       }
+            robot.rightMotorBack.setPower(-ispeed);
+            robot.rightMotorFront.setPower(-ispeed);
+            robot.leftMotorFront.setPower(-ispeed);
+            robot.leftMotorBack.setPower(-ispeed);
+        }
 
         while (opModeIsActive() &&
-                robot.color.red() < 6
-                ) {
+               robot.color.red() < 6) {
             //rangeADJ(ispeed, idir, irange);
             dummyBeaconVal = beacon.getAnalysis().getColorString();
-            telemetry.addData("white_line", robot.color.red());
-            telemetry.update();
+            //telemetry.addData("white_line", robot.color.red());
+            //telemetry.update();
         }
 
         robot.rightMotorBack.setPower(0.0);
         robot.rightMotorFront.setPower(0.0);
         robot.leftMotorFront.setPower(0.0);
         robot.leftMotorBack.setPower(0.0);
+
+        telemetry.log().add("Read Beacon Colors");
+        telemetry.update();
 
         String beaconVal;
         String beaconValNext;
@@ -206,47 +280,45 @@ public class LeptonAuto extends LeptonAutoSetup {
         beaconVals = beaconVal.split(",");
 
         while (!(beaconVals[0].equals("red") || beaconVals[0].equals("blue")) || !beaconValNext.equals(beaconVal)) {
-            Thread.sleep(200);
+            Thread.sleep(250);
             beaconVal = beaconValNext;
             beaconValNext = beacon.getAnalysis().getColorString();
             beaconVals = beaconVal.split(",");
-            telemetry.addData("Left", beaconVals[0]);
-            telemetry.update();
+//            telemetry.addData("Left", beaconVals[0]);
+//            telemetry.update();
         }
 
         telemetry.log().add("Beacon Reading: " + beaconVal);
-        telemetry.log().add("Alliance color: " + allianceColor.getValue());
-        telemetry.log().add("alliance char: " + allianceColor.getValue().charAt(0));
-        telemetry.log().add("color found at: " + Integer.toString(beaconVal.indexOf(allianceColor.getValue().charAt(0))));
+//        telemetry.log().add("Alliance color: " + allianceColor.getValue());
         telemetry.update();
 
         if (beaconVal.indexOf(allianceColor.getValue().charAt(0)) <4) {
-            if (idir == driveDirections.FORWARD) {
-                driveENC(.3, 1, driveDirections.BACKWARD);
+            if (allianceColor.getValue().equals("red")){
+
+                driveENC(.3, 4, driveDirections.FORWARD);
             }
             else {
-                driveENC(.3, 4, driveDirections.FORWARD);
+                driveENC(0.3, 10, driveDirections.FORWARD);
             }
         }
         else {
-            if (idir == driveDirections.FORWARD) {
-                driveENC(.3, 6, driveDirections.FORWARD);
+            if (allianceColor.getValue().equals("red")){
+                driveENC(.3, 10, driveDirections.FORWARD);
             }
             else {
-                driveENC(.3, 10, driveDirections.FORWARD);
+                driveENC(0.3, 5, driveDirections.FORWARD);
             }
         }
 
-
         if (allianceColor.getValue().equals("red")){
             robot.buttonPushLeft.setPosition(robot.BPL_OUT);
-            Thread.sleep(1000);
+            Thread.sleep(1200);
             robot.buttonPushLeft.setPosition(robot.BPL_MID);
             Thread.sleep(1000);
         }
         else {
             robot.buttonPushRight.setPosition(robot.BPR_OUT);
-            Thread.sleep(1000);
+            Thread.sleep(1200);
             robot.buttonPushRight.setPosition(robot.BPR_MID);
             Thread.sleep(1000);
         }
