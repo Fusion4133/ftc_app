@@ -14,7 +14,10 @@ package org.firstinspires.ftc.fusion4133;
 /**
  * Created by Fusion on 11/6/2016.
  */
-public abstract class LeptonAutoSetup extends LinearVisionOpMode {
+//we do a secondary setup for our auto because it allows us for a eaiser time in the future making autonomus because all basic movements are already defined.
+public abstract class LeptonAutoSetup extends LinearVisionOpMode
+    //this is where the autonomous options are defined.
+    {
     AutonomousTextOption    allianceColor = new AutonomousTextOption("Alliance Color", "blue", new String[] {"blue", "red"});
     AutonomousTextOption    startPos      = new AutonomousTextOption("Start Position", "middle", new String [] {"middle", "line"});
     AutonomousIntOption     waitStart     = new AutonomousIntOption("Wait at Start", 0, 0, 20);
@@ -23,10 +26,11 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
     AutonomousBooleanOption pressBeacons  = new AutonomousBooleanOption("Press Beacons", true);
     AutonomousBooleanOption parkCorner    = new AutonomousBooleanOption("Park Corner", true);
     AutonomousIntOption     waitShoot     = new AutonomousIntOption("Wait after Shoot", 0, 0, 20 );
-
+    //this is how we get the options to show up on the phone.
     AutonomousOption [] autoOptions       = {allianceColor, startPos, waitStart, numberBalls, waitShoot, pressBeacons, parkCenter, parkCorner};
     int currentOption = 0;
 
+    //this is how we tell the program what buttons we are using to chose the program.
     boolean aPressed = false;
     boolean bPressed = false;
     boolean xPressed = false;
@@ -43,6 +47,8 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
     double rightDirAdj;
     //time to rotate, 600 @ 1.0 motor power
     //time to rotate,
+
+    //this is so that we we keep the button pushers from smashing into the wall.
     double[]  bplPositions = {robot.BPL_IN,
             robot.BPL_IN,
             robot.BPL_IN,
@@ -138,7 +144,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         telemetry.update();
     }
 
-    // This is our main drive that the distance is determaind by the encoders.
+    // This is our main drive that the distance is determaind by the encoders so it will go as far as we tell it to go because of the ticks per inch above.
     public void driveENC (double ispeed, int idist, driveDirections idir) {
 
         double vSpeed = ispeed;
@@ -245,7 +251,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
             Thread.yield();
         }
     }
-    // This is a secondary drive that time detrmains the distance it goes.
+    // This is a secondary drive that time detrmains the distance it goes we don't use it often because it is inaccurate.
     public void driveTime(double ispeed, int itime, driveDirections idir) {
 
         if(idir == driveDirections.BACKWARD){
@@ -274,7 +280,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
 
 
     }
-    // This is a secondary spin turn where the amount of time is how far it turns.
+    // This is a secondary spin turn where the amount of time is how far it turns we don't use it often because it is inaccurate.
     public void spinTime (double ispeed, int itime, turnDirections idir) {
 
         if(idir == turnDirections.RIGHT){
@@ -301,7 +307,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         robot.leftMotorFront.setPower(0.0);
 
     }
-    //
+    //this is a spin turn we use that is based on encoders and is fairly accurate.
     public void spinENC (double ispeed, int idist, turnDirections idir, double iAllianceAdj) {
 
         double vSpeed = ispeed;
@@ -398,7 +404,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
     }
 
 
-
+    //this is a gyro turn that we use that is based on a gyroscopic sensor and is the most accurate of all the spin turns.
     public void spinGyro (double ispeed, int idist, turnDirections idir){
 
         int curGyro = 0;
@@ -451,7 +457,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         robot.leftMotorFront.setPower(0.0);
 
     }
-
+    //this is our time based point turn we don't use it often because it is inaccurate.
     public void pointTime (double ispeed, int itime, turnDirections idir){
 
         if(idir == turnDirections.LEFT) {
@@ -478,7 +484,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         robot.leftMotorFront.setPower(0.0);
 
     }
-
+    //this is our encodee base point turn.
     public void pointENC (double ispeed, int idist, turnDirections idir){
         int leftTargetFront;
         int leftTargetBack;
@@ -546,7 +552,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         robot.rightMotorBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.rightMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-
+    //this is how we shoot the balls the amoutn of time is based on testing that we did.
     public void shootBalls () throws InterruptedException{
         double popperPower = 0.8;
         if (numberBalls.getValue() > 0){
@@ -566,6 +572,8 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
             Thread.sleep(2000);
         }
     }
+
+    //this is our range based drive so that in the button press program we don't hit the walls.
     public void driveENCRange (double ispeed, int idist, driveDirections idir, double irange) {
 
         double vSpeed = ispeed;
@@ -665,6 +673,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode {
         telemetry.update();
     }
 
+    //this is how we make the drive range is scurate.
     public void rangeADJ (double ispeed, driveDirections idir, double irange) {
         double dirAdj;
         double slowInc = 0.075;

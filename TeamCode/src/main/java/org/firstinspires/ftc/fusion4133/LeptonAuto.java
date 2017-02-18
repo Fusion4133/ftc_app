@@ -37,7 +37,7 @@ public class LeptonAuto extends LeptonAutoSetup {
 
         telemetry.log().add("Robot Initalized");
         telemetry.update();
-
+        //we have this on or off for the led so that we make sure it is on.
         robot.color.enableLed(false);
         robot.color.enableLed(true);
 
@@ -45,7 +45,7 @@ public class LeptonAuto extends LeptonAutoSetup {
 
         telemetry.log().add("Vision Started");
         telemetry.update();
-
+        //we set the camera to the front facing one so that we can heve the screen accessible to the refs.
         this.setCamera(Cameras.SECONDARY);
         this.setFrameSize(new Size(900, 900));
 

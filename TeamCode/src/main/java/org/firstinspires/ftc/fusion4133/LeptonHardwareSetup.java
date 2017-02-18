@@ -22,6 +22,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.SensorMRRangeSenso
 /**
  * Created by Fusion on 10/26/2016.
  */
+//we have a hardware setup so that when making a program for are robot we don't have have to redefine everything every time.
 public class LeptonHardwareSetup {
 
     /* Public OpMode members. */
@@ -41,13 +42,13 @@ public class LeptonHardwareSetup {
     public Servo   tuskServo       = null;
     public Servo   hornServo       = null;
 
-// our sensor hardware setup
+    //this is where our sensors are defined.
     public GyroSensor                     gyro     = null;
     public ColorSensor                    color    = null;
     public ModernRoboticsI2cRangeSensor   range    = null;
 
 
-    /* local OpMode members. */
+    //these are som of the servo positions that we define so that it is eaiser to wright the program later on.
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
 
@@ -66,6 +67,7 @@ public class LeptonHardwareSetup {
     final static double HORN_RELEASED     = 0.0;
 
     /* Constructor */
+    //this is where all other hard ware mapping is done.
     public LeptonHardwareSetup(){
 
     }
@@ -97,7 +99,7 @@ public class LeptonHardwareSetup {
         collectionMotor.setDirection(DcMotor.Direction.REVERSE);//this reversed so that the collection motor goes forward.
         popperMotor.setDirection(DcMotor.Direction.FORWARD);//this reversed so that the collection motor goes forward.
 
-        //We have to make sure the motors don't move in initialize.
+        //We do this to make sure that are robot dosent move in inizalize.
         leftMotorFront.setPower(MOTOR_STOP);
         leftMotorBack.setPower(MOTOR_STOP);
         rightMotorFront.setPower(MOTOR_STOP);
@@ -107,8 +109,7 @@ public class LeptonHardwareSetup {
         popperMotor.setPower(MOTOR_STOP);
 
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
+        //the drive motors are preset to  run with encoders so we don't have to add this in autonomus.
         leftMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftMotorBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -137,6 +138,7 @@ public class LeptonHardwareSetup {
          * SENSOR SECTION
          ************************************************************/
         //Define sensors
+        //this are what they ar identifide as in the config file.
         gyro   = hwMap.gyroSensor.get("gyro");
         color  = hwMap.colorSensor.get("color");
         //range  = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range");

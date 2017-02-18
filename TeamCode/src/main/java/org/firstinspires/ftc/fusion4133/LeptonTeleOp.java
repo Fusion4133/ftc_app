@@ -12,11 +12,12 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 /**
  * Created by Fusion on 10/26/2016.
  */
+//run able teleop program that we use.
 @TeleOp(name="Lepton: TeleOp", group="Lepton")
 public class LeptonTeleOp extends OpMode{
 
-    LeptonHardwareSetup robot       = new LeptonHardwareSetup(); // use the class created to define a Pushbot's hardware
-
+    LeptonHardwareSetup robot       = new LeptonHardwareSetup(); //this is so that we can get are hardware map from are hardware setup to are teleop.
+    //this is where we define most of are doubles.
     double leftPower;
     double rightPower;
     double bpInc = 0.001;
@@ -32,6 +33,7 @@ public class LeptonTeleOp extends OpMode{
     double dirADJ;
 
     @Override
+    //this is our inizalize phase and it is what happens to the robot right when we press the int button on the Driver Station.
     public void init() {
         //telemetry.addData("Step", "Initializing");
         //telemetry.update();
@@ -43,7 +45,7 @@ public class LeptonTeleOp extends OpMode{
         reversedTriggerPressed = false;
 
         dirADJ = -1.0;
-
+        //this is to tell the motors to not use the encoders to drive.
         robot.init(hardwareMap);
         leftDriveFront = robot.leftMotorFront;
         leftDriveBack = robot.leftMotorBack;
@@ -74,7 +76,7 @@ public class LeptonTeleOp extends OpMode{
         leftDriveBack.setPower(leftPower);
         rightDriveFront.setPower(rightPower);
         rightDriveBack.setPower(rightPower);
-
+        //this is to reverse the motors so when capping the ball we can go backwards easliy. when b on gamepad is pressed after the motors are reset.
         if (gamepad1.a){
             leftDriveFront = robot.rightMotorBack;
             leftDriveBack = robot.rightMotorFront;
@@ -94,7 +96,7 @@ public class LeptonTeleOp extends OpMode{
 
         }
 
-        //Run collection system with triggers
+        //when the right trigger is pressed on gamepad1 the colection system is toggeled forwared.
         if(gamepad1.right_trigger > 0.3 && !triggerPressed){
             if (collectionState.equals("forward")){
                 collectionState = "off";
@@ -106,7 +108,7 @@ public class LeptonTeleOp extends OpMode{
             }
         }
         triggerPressed = gamepad1.right_trigger > 0.3;
-
+        //when the left trigger is pushed in on gamepad1 the collection system is toggeled backward.
         if(gamepad1.left_trigger > 0.3 && !reversedTriggerPressed){
             if (collectionState.equals("backward")){
                 collectionState = "off";
@@ -123,17 +125,19 @@ public class LeptonTeleOp extends OpMode{
         //Run lift with joy stick
         robot.liftMotor.setPower(gamepad2.right_stick_y);
 
-        //button pusher section
+        //when the y button is pressed on gamepad 2 the left button pusher is brought in.
         if (gamepad2.y) {
             robot.buttonPushLeft.setPosition(Math.min(robot.buttonPushLeft.getPosition() + bpInc, robot.BPL_IN));
         }
+        //when the x button is pressed on gamepad 2 the left button pusher is extended.
         else if (gamepad2.x) {
             robot.buttonPushLeft.setPosition(Math.max(robot.buttonPushLeft.getPosition() - bpInc, robot.BPL_OUT));
         }
-
+        //when the b button is pressed on gamepad 2 the right button pusher is extended.
         if (gamepad2.b) {
             robot.buttonPushRight.setPosition(Math.max(robot.buttonPushRight.getPosition() - bpInc, robot.BPR_OUT));
         }
+        //when the a button is pressed on gamepad 2  the right button pusher is brought in.
         else if (gamepad2.a){
             robot.buttonPushRight.setPosition(Math.min(robot.buttonPushRight.getPosition() + bpInc, robot.BPR_IN));
         }
@@ -162,10 +166,11 @@ public class LeptonTeleOp extends OpMode{
             robot.hornServo.setPosition(robot.HORN_RELEASED);
         }
 
-        //popper
+        //popper motor is activated and turns to lauch ball.
         if (gamepad2.right_trigger > 0.3) {
             robot.popperMotor.setPower(popperPower);
         }
+        //this is to insure that the popper motor is deactivative.
         else {
             robot.popperMotor.setPower(0.0);
         }
