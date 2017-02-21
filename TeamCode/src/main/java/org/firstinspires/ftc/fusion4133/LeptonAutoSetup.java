@@ -673,7 +673,7 @@ public abstract class LeptonAutoSetup extends LinearVisionOpMode
         telemetry.update();
     }
 
-    //this is how we make the drive range is scurate.
+    //this is how we make the drive range is accurate.
     public void rangeADJ (double ispeed, driveDirections idir, double irange) {
         double dirAdj;
         double slowInc = 0.075;
